@@ -173,7 +173,7 @@ export function ChatWindow(props: {
           {intemediateStepsToggle}
           {speakerToggle}
         </div>
-        <div className="flex w-full mt-4 gap-1">
+        <div className="flex w-full mt-4 gap-1 flex-wrap">
           <input
             className="grow mr-8 p-4 rounded"
             value={input}
@@ -190,7 +190,7 @@ export function ChatWindow(props: {
             </div>
             <span className={(chatEndpointIsLoading || intermediateStepsLoading) ? "hidden" : ""}>Send</span>
           </button>
-          <button className="shrink-0 px-8 py-4 bg-sky-600 rounded w-28" onClick={startListening}>Talk</button>
+          <button type='button' className="shrink-0 px-8 py-4 bg-sky-600 rounded w-28" onClick={startListening}>Talk</button>
         </div>
       </form>
       <ToastContainer />
