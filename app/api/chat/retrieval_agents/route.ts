@@ -14,6 +14,7 @@ import {
 } from "langchain/agents/toolkits";
 import { ChatMessageHistory } from "langchain/memory";
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
+import { sendEmailTool } from "@/app/tools/sendemail";
 
 export const runtime = "edge";
 
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
      * Wrap the retriever in a tool to present it to the agent in a
      * usable form.
      */
-    const tools = [ new SerpAPI(), createRetrieverTool(retriever, {
+    const tools = [ sendEmailTool, new SerpAPI(), createRetrieverTool(retriever, {
       name: "search_latest_knowledge",
       description: "Searches and returns up-to-date general information.",
     })];
