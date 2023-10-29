@@ -17,7 +17,11 @@ function speak(text: string) {
   speechSynthesis.speak(utterance);
 }
 
-
+function stripMarkdown(code:string) {
+  let text = code.replace(/`{3}[\s\S]*?`{3}/g, ''); // Remove triple backtick code blocks
+  text = text.replace(/`[^`]+`/g, ''); // Remove inline code blocks
+  return text.trim();
+}
 
 export function ChatWindow(props: {
   endpoint: string,
@@ -71,7 +75,8 @@ export function ChatWindow(props: {
       onFinish(message) {
         if (isSpeak) {
           console.log(message?.content)
-          speak(message?.content)
+          console.log(stripMarkdown(message?.content))
+          speak(stripMarkdown(message?.content))
         }
       }
     });
