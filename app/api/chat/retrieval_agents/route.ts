@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
+import { SerpAPI } from "langchain/tools";
 import { AIMessage, ChatMessage, HumanMessage } from "langchain/schema";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import {
@@ -26,9 +27,8 @@ const convertVercelMessageToLangChainMessage = (message: VercelChatMessage) => {
   }
 };
 
-const TEMPLATE = `You are a stereotypical robot named Robbie and must answer all questions like a stereotypical robot. Use lots of interjections like "BEEP" and "BOOP".
-
-If you don't know how to answer a question, use the available tools to look up relevant information. You should particularly do this for questions about LangChain.`;
+const TEMPLATE = `You are iBrain the AI Companion member of Infinisoft Team, you will be as much helpful as possible.
+If you don't know how to answer a question, use the available tools to look up relevant information.`;
 
 /**
  * This handler initializes and calls a retrieval agent. It requires an OpenAI
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     const currentMessageContent = messages[messages.length - 1].content;
 
     const model = new ChatOpenAI({
-      modelName: "gpt-4",
+      modelName: "gpt-3.5-turbo",
     });
 
     const client = createClient(
@@ -93,12 +93,13 @@ export async function POST(req: NextRequest) {
      * Wrap the retriever in a tool to present it to the agent in a
      * usable form.
      */
-    const tool = createRetrieverTool(retriever, {
+    const tools = [ new SerpAPI(), createRetrieverTool(retriever, {
       name: "search_latest_knowledge",
       description: "Searches and returns up-to-date general information.",
-    });
+    })];
 
-    const executor = await initializeAgentExecutorWithOptions([tool], model, {
+
+    const executor = await initializeAgentExecutorWithOptions(tools, model, {
       agentType: "openai-functions",
       memory,
       returnIntermediateSteps: true,
@@ -125,7 +126,7 @@ export async function POST(req: NextRequest) {
         async start(controller) {
           for (const character of result.output) {
             controller.enqueue(textEncoder.encode(character));
-            await new Promise((resolve) => setTimeout(resolve, 20));
+            await new Promise((resolve) => setTimeout(resolve, 1));
           }
           controller.close();
         },

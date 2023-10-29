@@ -1,4 +1,5 @@
 import { ChatWindow } from "@/components/ChatWindow";
+import AgentsPage from "./retrieval_agents/page";
 
 export default function Home() {
   const InfoCard = (
@@ -69,12 +70,13 @@ export default function Home() {
     </div>
   );
   return (
-    <ChatWindow
-      endpoint="api/chat"
-      emoji="🏴‍☠️"
-      titleText="Patchy the Chatty Pirate"
-      placeholder="I'm an LLM pretending to be a pirate! Ask me about the pirate life!"
-      emptyStateComponent={InfoCard}
-    ></ChatWindow>
+    // <ChatWindow
+    //   endpoint="api/chat"
+    //   emoji="🏴‍☠️"
+    //   titleText="Patchy the Chatty Pirate"
+    //   placeholder="I'm an LLM pretending to be a pirate! Ask me about the pirate life!"
+    //   emptyStateComponent={InfoCard}
+    // ></ChatWindow>
+    <AgentsPage />
   );
 }

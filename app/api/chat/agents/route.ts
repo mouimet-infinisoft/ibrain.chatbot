@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     // Requires process.env.SERPAPI_API_KEY to be set: https://serpapi.com/
     const tools = [new Calculator(), new SerpAPI()];
-    const chat = new ChatOpenAI({ modelName: "gpt-4", temperature: 0 });
+    const chat = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0 });
 
     /**
      * The default prompt for the OpenAI functions agent has a placeholder
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         async start(controller) {
           for (const character of result.output) {
             controller.enqueue(textEncoder.encode(character));
-            await new Promise((resolve) => setTimeout(resolve, 20));
+            await new Promise((resolve) => setTimeout(resolve, 1));
           }
           controller.close();
         },
