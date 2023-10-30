@@ -99,11 +99,25 @@ export function ChatWindow(props: {
   let SpeechRecognition = useRef<any>(null)
   const recognitionRef = useRef<any>(null)
   const recognizing = useRef<any>(false)
-  // Weird hack to fix SSR build problem
-  if (typeof window !== 'undefined') {
-    SpeechRecognition.current = (window as any)?.webkitSpeechRecognition || (window as any)?.SpeechRecognition
-    recognitionRef.current = new SpeechRecognition.current()
-  }
+  const started = useRef<any>(false)
+
+
+  useEffect(() => {
+    // Weird hack to fix SSR build problem
+    if (typeof window !== 'undefined') {
+      SpeechRecognition.current = (window as any)?.webkitSpeechRecognition || (window as any)?.SpeechRecognition
+      recognitionRef.current = new SpeechRecognition.current()
+    }
+
+    timerRef.current = setInterval(() => {
+      try {
+        if (!started.current) {
+          recognitionRef.current.start()
+        }
+      } catch (e) { console.error(e) }
+    }, 1000)
+    return () => { clearInterval(timerRef.current) }
+  }, [])
 
   function startListening() {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -132,7 +146,8 @@ export function ChatWindow(props: {
       }
 
       // Event handler for language detection
-      recognitionRef.current.onaudiostart = function () {
+      recognitionRef.current.onstart = function () {
+        started.current = true;
         console.log('ON audio start');
         if (speechSynthesis.speaking) {
           console.log('AI Speaking: stoping recognition');
@@ -143,17 +158,15 @@ export function ChatWindow(props: {
 
       };
 
-      recognitionRef.current.onaudioend = function () {
+
+
+      recognitionRef.current.onend = function () {
+        started.current = false;
         console.log('Audio capturing ended');
         submitRef.current?.click()
         setInput("");
-        if (timerRef.current) {
-          clearTimeout(timerRef.current)
-        }
-        timerRef.current = setTimeout(() => { recognitionRef.current.start() }, 1000)
       };
 
-      recognitionRef.current.start();
     } else {
       alert('Web Speech API is not supported in this browser.');
     }

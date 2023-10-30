@@ -11,6 +11,23 @@ import { BufferMemory, ChatMessageHistory } from "langchain/memory";
 
 export const runtime = "edge";
 
+const MAX_TOKENS = 4000;
+
+async function limitTokens(chatHistory: ChatMessageHistory) {
+  let tokens = 0;
+  const limitedMessages = [];
+
+  // Iterate over messages from newest to oldest
+  for (const message of (await chatHistory.getMessages()).reverse()) {
+    tokens += message.content.split(/\s+/).length; // A simple approximation
+    if (tokens > MAX_TOKENS) break;
+    limitedMessages.unshift(message); // Add the message to the beginning
+  }
+
+  return new ChatMessageHistory(limitedMessages);
+}
+
+
 const convertVercelMessageToLangChainMessage = (message: VercelChatMessage) => {
   if (message.role === "user") {
     return new HumanMessage(message.content);
@@ -48,7 +65,8 @@ export async function POST(req: NextRequest) {
 
     // Requires process.env.SERPAPI_API_KEY to be set: https://serpapi.com/
     const tools = [new Calculator(), new SerpAPI()];
-    const chat = new ChatOpenAI({ modelName: "gpt-3.5-turbo", temperature: 0 });
+    const chat = new ChatOpenAI({ modelName: "gpt-3.5-turbo-16k", temperature: 0 });
+    const limitedChatHistory = await limitTokens(new ChatMessageHistory(previousMessages));
 
     /**
      * The default prompt for the OpenAI functions agent has a placeholder
@@ -61,7 +79,7 @@ export async function POST(req: NextRequest) {
       returnIntermediateSteps,
       memory: new BufferMemory({
         memoryKey: "chat_history",
-        chatHistory: new ChatMessageHistory(previousMessages),
+        chatHistory: limitedChatHistory,
         returnMessages: true,
         outputKey: "output",
       }),
