@@ -96,12 +96,13 @@ export function ChatWindow(props: {
       }
     });
 
-  const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+  const _window: any = window || {}
+  const SpeechRecognition = _window?.webkitSpeechRecognition || _window?.SpeechRecognition;
   const recognitionRef = useRef<any>(new SpeechRecognition())
   const recognizing = useRef<any>(false)
 
   function startListening() {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    if ('webkitSpeechRecognition' in _window || 'SpeechRecognition' in _window) {
       recognitionRef.current.continuous = true;
 
       // Event handler for speech recognition results
