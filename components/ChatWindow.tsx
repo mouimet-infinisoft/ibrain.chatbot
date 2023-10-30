@@ -4,22 +4,35 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { useChat } from "ai/react";
-import { useRef, useState, ReactElement } from "react";
+import { useRef, useState, ReactElement, useEffect } from "react";
 import type { FormEvent } from "react";
 import type { AgentStep } from "langchain/schema";
 
 import { ChatMessageBubble } from "@/components/ChatMessageBubble";
 import { UploadDocumentsForm } from "@/components/UploadDocumentsForm";
 import { IntermediateStep } from "./IntermediateStep";
+const LanguageDetect = require('languagedetect');
+const lngDetector = new LanguageDetect();
+
+let lang = "fr"
+const langCodes: { [x: string]: string } = {
+  fr: "fr-CA",
+  en: "en-US"
+}
 
 function speak(text: string) {
   const utterance = new SpeechSynthesisUtterance(text);
+  lngDetector.setLanguageType('iso2')
+  lang = lngDetector.detect(text, 1)?.[0]?.[0] ?? 'en'
+  utterance.lang = lang
   speechSynthesis.speak(utterance);
 }
 
-function stripMarkdown(code:string) {
+function stripMarkdown(code: string) {
   let text = code.replace(/`{3}[\s\S]*?`{3}/g, ''); // Remove triple backtick code blocks
   text = text.replace(/`[^`]+`/g, ''); // Remove inline code blocks
+  text = text.replace(/\[([^\]]+)\]\([^)]+\)/g, (match, label) => label);
+
   return text.trim();
 }
 
@@ -55,7 +68,8 @@ export function ChatWindow(props: {
   );
 
   const [sourcesForMessages, setSourcesForMessages] = useState<Record<string, any>>({});
-
+  const submitRef = useRef<any>(null)
+  const timerRef = useRef<any>(null)
   const { messages, input, setInput, handleInputChange, handleSubmit, isLoading: chatEndpointIsLoading, setMessages } =
     useChat({
       api: endpoint,
@@ -76,24 +90,69 @@ export function ChatWindow(props: {
         if (isSpeak) {
           console.log(message?.content)
           console.log(stripMarkdown(message?.content))
+          recognitionRef.current.stop()
           speak(stripMarkdown(message?.content))
         }
       }
     });
 
-    function startListening() {
-      if ('webkitSpeechRecognition' in window) {
-        const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-        const recognition = new SpeechRecognition();
-        recognition.onresult = function (event: any) {
-          console.log(event.results[0][0].transcript);
-          setInput(event.results[0][0].transcript);
+  const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+  const recognitionRef = useRef<any>(new SpeechRecognition())
+  const recognizing = useRef<any>(false)
+
+  function startListening() {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      recognitionRef.current.continuous = true;
+
+      // Event handler for speech recognition results
+      recognitionRef.current.onresult = function (event: any) {
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          const language = event.results[i][0].lang;
+          console.log(transcript, language, event);
+          setInput(prev => prev + " " + transcript);
         }
-        recognition.start();
-      } else {
-        alert('Web Speech API is not supported in this browser.');
+      };
+
+      recognitionRef.current.onspeechstart = function (event: any) {
+        recognitionRef.current.lang = langCodes?.[lang] ?? "en-US"
+        console.log('ON speech start');
+        recognizing.current = true;
       }
+
+      recognitionRef.current.onspeechend = function (event: any) {
+        console.log('ON speech end');
+        recognizing.current = false;
+        recognitionRef.current.stop()
+      }
+
+      // Event handler for language detection
+      recognitionRef.current.onaudiostart = function () {
+        console.log('ON audio start');
+        if (speechSynthesis.speaking) {
+          console.log('AI Speaking: stoping recognition');
+          recognitionRef.current.stop()
+        } else {
+          console.log('Audio capturing started');
+        }
+
+      };
+
+      recognitionRef.current.onaudioend = function () {
+        console.log('Audio capturing ended');
+        submitRef.current?.click()
+        setInput("");
+        if (timerRef.current) {
+          clearTimeout(timerRef.current)
+        }
+        timerRef.current = setTimeout(() => { recognitionRef.current.start() }, 1000)
+      };
+
+      recognitionRef.current.start();
+    } else {
+      alert('Web Speech API is not supported in this browser.');
     }
+  }
 
   async function sendMessage(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -146,6 +205,10 @@ export function ChatWindow(props: {
     }
   }
 
+  useEffect(() => {
+    startListening()
+  }, [])
+
   return (
     <div className={`flex flex-col items-center p-4 md:p-8 rounded grow overflow-hidden ${(messages.length > 0 ? "border" : "")}`}>
       <h2 className={`${messages.length > 0 ? "" : "hidden"} text-2xl`}>{emoji} {titleText}</h2>
@@ -166,7 +229,7 @@ export function ChatWindow(props: {
         )}
       </div>
 
-      {messages.length === 0 && ingestForm}
+      {/* {messages.length === 0 && ingestForm} */}
 
       <form onSubmit={sendMessage} className="flex w-full flex-col">
         <div className="flex gap-1">
@@ -180,7 +243,7 @@ export function ChatWindow(props: {
             placeholder={placeholder ?? "What's it like to be a pirate?"}
             onChange={handleInputChange}
           />
-          <button type="submit" className="shrink-0 px-8 py-4 bg-sky-600 rounded w-28">
+          <button ref={submitRef} type="submit" className="shrink-0 px-8 py-4 bg-sky-600 rounded w-28">
             <div role="status" className={`${(chatEndpointIsLoading || intermediateStepsLoading) ? "" : "hidden"} flex justify-center`}>
               <svg aria-hidden="true" className="w-6 h-6 text-white animate-spin dark:text-white fill-sky-800" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
