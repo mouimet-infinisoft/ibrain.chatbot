@@ -4,14 +4,14 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { useChat } from "ai/react";
-import { useRef, useState, ReactElement, useEffect } from "react";
+import { useRef, useState, ReactElement, useEffect, useMemo } from "react";
 import type { FormEvent } from "react";
 import type { AgentStep } from "langchain/schema";
 
 import { ChatMessageBubble } from "@/components/ChatMessageBubble";
 import { UploadDocumentsForm } from "@/components/UploadDocumentsForm";
 import { IntermediateStep } from "./IntermediateStep";
-const LanguageDetect = require('languagedetect');
+import LanguageDetect from 'languagedetect'
 const lngDetector = new LanguageDetect();
 
 let lang = "fr"
@@ -96,13 +96,17 @@ export function ChatWindow(props: {
       }
     });
 
-  const _window: any = window || {}
-  const SpeechRecognition = _window?.webkitSpeechRecognition || _window?.SpeechRecognition;
-  const recognitionRef = useRef<any>(new SpeechRecognition())
+  let SpeechRecognition = useRef<any>(null)
+  const recognitionRef = useRef<any>(null)
   const recognizing = useRef<any>(false)
+  // Weird hack to fix SSR build problem
+  if (typeof window !== 'undefined') {
+    SpeechRecognition.current = (window as any)?.webkitSpeechRecognition || (window as any)?.SpeechRecognition
+    recognitionRef.current = new SpeechRecognition.current()
+  }
 
   function startListening() {
-    if ('webkitSpeechRecognition' in _window || 'SpeechRecognition' in _window) {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       recognitionRef.current.continuous = true;
 
       // Event handler for speech recognition results
