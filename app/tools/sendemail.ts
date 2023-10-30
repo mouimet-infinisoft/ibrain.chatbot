@@ -2,7 +2,7 @@ import axios from 'axios';
 import { DynamicTool } from 'langchain/tools';
 
 async function sendEmail(content: string, title: string, destination: string): Promise<void> {
-    const apiUrl = 'http://localhost:5000/sendemail';
+    const apiUrl = 'https://apis-alpha.vercel.app/sendemail';
 
     const payload = {
         content,
