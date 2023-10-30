@@ -15,6 +15,7 @@ import {
 import { ChatMessageHistory } from "langchain/memory";
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { sendEmailTool } from "@/app/tools/sendemail";
+import { WebBrowser } from "langchain/tools/webbrowser";
 
 export const runtime = "edge";
 
@@ -94,11 +95,12 @@ export async function POST(req: NextRequest) {
      * Wrap the retriever in a tool to present it to the agent in a
      * usable form.
      */
-    const tools = [ sendEmailTool, new SerpAPI(), createRetrieverTool(retriever, {
-      name: "search_latest_knowledge",
-      description: "Searches and returns up-to-date general information.",
-    })];
+    // const tools = [ sendEmailTool, new SerpAPI(), createRetrieverTool(retriever, {
+    //   name: "search_latest_knowledge",
+    //   description: "Searches and returns up-to-date general information.",
+    // })];
 
+    const tools = [sendEmailTool, new SerpAPI(), new WebBrowser({ model, embeddings: new OpenAIEmbeddings() })];
 
     const executor = await initializeAgentExecutorWithOptions(tools, model, {
       agentType: "openai-functions",
