@@ -2,39 +2,18 @@
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 import { useChat } from "ai/react";
 import { useRef, useState, ReactElement, useEffect, useMemo } from "react";
 import type { FormEvent } from "react";
-import type { AgentStep } from "langchain/schema";
-
+import { SystemMessage, type AgentStep } from "langchain/schema";
 import { ChatMessageBubble } from "@/components/ChatMessageBubble";
 import { UploadDocumentsForm } from "@/components/UploadDocumentsForm";
 import { IntermediateStep } from "./IntermediateStep";
-import LanguageDetect from 'languagedetect'
-const lngDetector = new LanguageDetect();
-
-// let lang = "fr"
-const langCodes: { [x: string]: string } = {
-  fr: "fr-CA",
-  en: "en-US"
-}
-
-// function speak(text: string) {
-//   const utterance = new SpeechSynthesisUtterance(text);
-//   lngDetector.setLanguageType('iso2')
-//   lang = lngDetector.detect(text, 1)?.[0]?.[0] ?? 'en'
-//   utterance.lang = lang
-//   speechSynthesis.speak(utterance);
-// }
-
-function stripMarkdown(code: string) {
-  let text = code.replace(/`{3}[\s\S]*?`{3}/g, ''); // Remove triple backtick code blocks
-  text = text.replace(/`[^`]+`/g, ''); // Remove inline code blocks
-  text = text.replace(/\[([^\]]+)\]\([^)]+\)/g, (match, label) => label);
-
-  return text.trim();
-}
+import { stripMarkdown } from '../app/helpers/transform'
+import { useBrainVoice } from '@/app/hooks/use.brain.voice';
+import brainstack from '@/app/hooks/brainstack'
+import { useIdentication } from '@/app/hooks/use.identification';
+const { useBrainStack, getValue } = brainstack
 
 export function ChatWindow(props: {
   endpoint: string,
@@ -46,19 +25,10 @@ export function ChatWindow(props: {
   showIntermediateStepsToggle?: boolean,
 }) {
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
-
   const { endpoint, emptyStateComponent, placeholder, titleText = "An LLM", showIngestForm, showIntermediateStepsToggle, emoji } = props;
-  const recognitionRef = useRef<any>(null)
-  const idleTimerRef = useRef<any>(null)
-  /**
-   * stopped: ignoring micro stopped
-   * listening: micro started but no speaking
-   * processing: someone speaking
-   * idle: speaking completed speaking
-   */
-  const microRef = useRef<any>('stopped')
+  const { speak, SpeakerToggle, } = useBrainVoice()
+  const formRef = useRef<any>(null);
   const [showIntermediateSteps, setShowIntermediateSteps] = useState(false);
-  const [isSpeak, setIsSpeak] = useState(true);
   const [intermediateStepsLoading, setIntermediateStepsLoading] = useState(false);
   const ingestForm = showIngestForm && <UploadDocumentsForm></UploadDocumentsForm>;
   const intemediateStepsToggle = showIntermediateStepsToggle && (
@@ -67,27 +37,11 @@ export function ChatWindow(props: {
       <label htmlFor="show_intermediate_steps"> Show intermediate steps</label>
     </div>
   );
-
-  const speakerToggle = (
-    <div>
-      <input type="checkbox" id="show_speak" name="show_speak" checked={isSpeak} onChange={(e) => setIsSpeak(e.target.checked)}></input>
-      <label htmlFor="show_speak"> Speak</label>
-    </div>
-  );
-
-  function speak(text: string) {
-    const utterance = new SpeechSynthesisUtterance(text);
-    lngDetector.setLanguageType('iso2')
-    const lang = lngDetector.detect(text, 1)?.[0]?.[0] ?? 'en'
-    recognitionRef.current.lang = langCodes?.[lang] ?? "en-US"
-    utterance.lang = lang
-    speechSynthesis.speak(utterance);
-  }
-
   const [sourcesForMessages, setSourcesForMessages] = useState<Record<string, any>>({});
   const submitRef = useRef<any>(null)
-  const timerRef = useRef<any>(null)
-  const { messages, input, setInput, handleInputChange, handleSubmit, isLoading: chatEndpointIsLoading, setMessages } =
+  const bstack = useBrainStack()
+
+  const { messages, input, setInput, handleInputChange, handleSubmit, isLoading: chatEndpointIsLoading, setMessages, append } =
     useChat({
       api: endpoint,
       onResponse(response) {
@@ -104,119 +58,41 @@ export function ChatWindow(props: {
         });
       },
       onFinish(message) {
-        if (isSpeak) {
-          console.log(message?.content)
-          console.log(stripMarkdown(message?.content))
-          recognitionRef.current.stop()
-          speak(stripMarkdown(message?.content))
-        }
+        bstack.log.info(message?.content)
+        bstack.log.info(stripMarkdown(message?.content))
+        speak(stripMarkdown(message?.content))
       }
     });
 
-
-
-
   useEffect(() => {
-    // Weird hack to fix SSR build problem
-    if (typeof window !== 'undefined') {
-      const SpeechRecognition = (window as any)?.webkitSpeechRecognition || (window as any)?.SpeechRecognition
-      recognitionRef.current = new SpeechRecognition()
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.lang = langCodes['fr']
-
-      recognitionRef.current.onresult = function (event: any) {
-        if (idleTimerRef.current) {
-          clearTimeout(idleTimerRef.current)
-        }
-        if (speechSynthesis.speaking) {
-          microRef.current = 'stopped'
-          recognitionRef.current.abort()
-          return;
-        }
-
-        /**
-         * Debounced timer to speed conversation lifecycle
-         * onspeechend is very slow to trigger
-         * therefore, when stop speaking it may take 5-10s
-         * to send request
-         */
-        idleTimerRef.current = setTimeout(() => {
-          if (microRef.current === 'idle') {
-            microRef.current = 'stopped'
-            recognitionRef.current.stop()
-          }
-        }, 3000)
-
-        microRef.current = 'idle'
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          console.log(transcript, event);
-          setInput(prev => prev + " " + transcript);
-        }
-      };
-
-      recognitionRef.current.onspeechstart = function (event: any) {
-        if (speechSynthesis.speaking) {
-          microRef.current = 'stopped'
-          recognitionRef.current.abort()
-          return;
-        }
-
-        microRef.current = 'processing'
-        console.log(`ON speech start in language ${recognitionRef.current.lang}`);
-      }
-
-      recognitionRef.current.onspeechend = function (event: any) {
-        microRef.current = 'stopped'
-
-        if (speechSynthesis.speaking) {
-          recognitionRef.current.abort()
-          return;
-        }
-        console.log('ON speech end');
-        recognitionRef.current.stop()
-      }
-
-      recognitionRef.current.onstart = function () {
-        console.log(`ON start in language ${recognitionRef.current.lang}`);
-        if (speechSynthesis.speaking) {
-          console.log('AI Speaking: stoping recognition');
-          microRef.current = 'stopped'
-          recognitionRef.current.abort()
-          return;
-        }
-
-        microRef.current = 'listening'
-        console.log('Audio capturing started');
-      };
-
-      recognitionRef.current.onend = function () {
-        microRef.current = 'stopped'
-        console.log('Audio capturing ended');
-        submitRef.current?.click()
-        setInput("");
-      };
-    }
-
-    timerRef.current = setInterval(() => {
-      try {
-        if (!speechSynthesis.speaking && microRef.current === 'stopped') {
-          microRef.current = 'listening'
-          recognitionRef.current.start()
-        }
-      } catch (e) { console.error(e) }
-    }, 1000)
-    return () => {
-      clearTimeout(idleTimerRef.current)
-      clearInterval(timerRef.current)
-    }
-  }, [])
-
-  async function sendMessage(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
     if (messageContainerRef.current) {
       messageContainerRef.current.classList.add("grow");
     }
+    const isUnknowPerson = getValue(`me`)?.name === undefined
+    const unknownPersonMessage = `You will introduce yourself to the user you talk for the first time. You will ask for his or her name.`
+    const welcomeBackMessage = `It's ${getValue('me')?.name} coming back. You will greet warmly.`
+    const content = isUnknowPerson ? unknownPersonMessage : welcomeBackMessage
+    append({ id: '1', role: 'user', content })
+  }, [])
+
+  bstack.useOn('ibrain.voice.message', ({ message }: any) => {
+    bstack.log.info(message)
+    setInput(prev => prev + " " + message);
+  })
+
+  bstack.useOn('ibrain.voice.thought', ({ message }: any) => {
+    bstack.log.info(message)
+    append(message)
+  })
+
+  bstack.useOn('ibrain.voice.end', () => {
+    submitRef.current?.click()
+    setInput("");
+  })
+
+  async function sendMessage(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
     if (!messages.length) {
       await new Promise(resolve => setTimeout(resolve, 300));
     }
@@ -272,7 +148,7 @@ export function ChatWindow(props: {
         ref={messageContainerRef}
       >
         {messages.length > 0 ? (
-          [...messages]
+          [...messages.filter(({ id }) => id !== "1")]
             .reverse()
             .map((m, i) => {
               const sourceKey = (messages.length - 1 - i).toString();
@@ -285,10 +161,10 @@ export function ChatWindow(props: {
 
       {/* {messages.length === 0 && ingestForm} */}
 
-      <form onSubmit={sendMessage} className="flex w-full flex-col">
+      <form ref={formRef} onSubmit={sendMessage} className="flex w-full flex-col">
         <div className="flex gap-1">
           {intemediateStepsToggle}
-          {speakerToggle}
+          <SpeakerToggle />
         </div>
         <div className="flex w-full mt-4 gap-1 flex-wrap">
           <input

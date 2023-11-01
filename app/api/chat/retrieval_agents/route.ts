@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Message as VercelChatMessage, StreamingTextResponse } from "ai";
-import { createClient } from "@supabase/supabase-js";
+// import { createClient } from "@supabase/supabase-js";
 import { ChatOpenAI } from "langchain/chat_models/openai";
-import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
-import { SerpAPI, ReadFileTool, WriteFileTool } from "langchain/tools";
+// import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
+// import { SerpAPI, ReadFileTool, WriteFileTool } from "langchain/tools";
 import { AIMessage, ChatMessage, HumanMessage } from "langchain/schema";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import {
-  createRetrieverTool,
+  // createRetrieverTool,
   OpenAIAgentTokenBufferMemory,
 } from "langchain/agents/toolkits";
 import { ChatMessageHistory } from "langchain/memory";
@@ -20,8 +20,10 @@ import { listFilesTool } from "@/app/tools/fs/list";
 import { readFileTool } from "@/app/tools/fs/read";
 import { createFileTool } from "@/app/tools/fs/create";
 import { updateFileTool } from "@/app/tools/fs/update";
-import { searchFileTool } from "@/app/tools/fs/search";
+// import { searchFileTool } from "@/app/tools/fs/search";
 import { deployStoredProcTool } from '@/app/tools/sql/deploy'; // Import the deployStoredProcTool
+// import { aiExpectationTool } from "@/app/tools/conversation/ai_expectation";
+// import { storeIdentificationTool } from "@/app/tools/conversation/store_identification";
 
 export const runtime = "edge";
 
@@ -71,19 +73,19 @@ export async function POST(req: NextRequest) {
       modelName: "gpt-3.5-turbo-16k"
     });
 
-    const client = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PRIVATE_KEY!
-    );
-    const vectorstore = new SupabaseVectorStore(new OpenAIEmbeddings(), {
-      client,
-      tableName: "documents",
-      queryName: "match_documents"
-    });
+    // const client = createClient(
+    //   process.env.SUPABASE_URL!,
+    //   process.env.SUPABASE_PRIVATE_KEY!
+    // );
+    // const vectorstore = new SupabaseVectorStore(new OpenAIEmbeddings(), {
+    //   client,
+    //   tableName: "documents",
+    //   queryName: "match_documents"
+    // });
 
-    const chatHistory = new ChatMessageHistory(
-      previousMessages.map(convertVercelMessageToLangChainMessage)
-    );
+    // const chatHistory = new ChatMessageHistory(
+    //   previousMessages.map(convertVercelMessageToLangChainMessage)
+    // );
     const limitedChatHistory = await limitTokens(
       new ChatMessageHistory(previousMessages.map(convertVercelMessageToLangChainMessage))
     );
@@ -95,9 +97,11 @@ export async function POST(req: NextRequest) {
       chatHistory: limitedChatHistory
     });
 
-    const retriever = vectorstore.asRetriever();
+    // const retriever = vectorstore.asRetriever();
 
     const tools = [
+      // storeIdentificationTool,
+      // aiExpectationTool,
       updateFileTool,
       createFileTool,
       readFileTool,
@@ -105,9 +109,9 @@ export async function POST(req: NextRequest) {
       toolGenerator,
       umlTool,
       sendEmailTool,
-      new SerpAPI(),
+      // new SerpAPI(),
       new WebBrowser({ model, embeddings: new OpenAIEmbeddings() }),
-      searchFileTool,
+      // searchFileTool,
       deployStoredProcTool // Include the deployStoredProcTool in the tools array
     ];
 
@@ -136,10 +140,11 @@ export async function POST(req: NextRequest) {
       const textEncoder = new TextEncoder();
       const fakeStream = new ReadableStream({
         async start(controller) {
-          for (const character of result.output) {
-            controller.enqueue(textEncoder.encode(character));
-            await new Promise(resolve => setTimeout(resolve, 1));
-          }
+          controller.enqueue(textEncoder.encode(result.output));
+          // for (const character of result.output) {
+          //   controller.enqueue(textEncoder.encode(character));
+          //   // await new Promise(resolve => setTimeout(resolve, 1));
+          // }
           controller.close();
         }
       });
