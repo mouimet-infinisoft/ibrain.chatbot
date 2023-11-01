@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { DynamicTool } from 'langchain/tools';
 
 async function sendEmail(content: string, title: string, destination: string): Promise<void> {
