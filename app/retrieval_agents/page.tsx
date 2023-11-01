@@ -1,3 +1,5 @@
+"use client"
+
 import { ChatWindow } from "@/components/ChatWindow";
 import { useEffect } from "react";
 import { getCookie, setCookie } from "../helpers/cookie";
