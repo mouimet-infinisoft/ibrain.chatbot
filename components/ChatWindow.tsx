@@ -14,19 +14,19 @@ import { IntermediateStep } from "./IntermediateStep";
 import LanguageDetect from 'languagedetect'
 const lngDetector = new LanguageDetect();
 
-let lang = "fr"
+// let lang = "fr"
 const langCodes: { [x: string]: string } = {
   fr: "fr-CA",
   en: "en-US"
 }
 
-function speak(text: string) {
-  const utterance = new SpeechSynthesisUtterance(text);
-  lngDetector.setLanguageType('iso2')
-  lang = lngDetector.detect(text, 1)?.[0]?.[0] ?? 'en'
-  utterance.lang = lang
-  speechSynthesis.speak(utterance);
-}
+// function speak(text: string) {
+//   const utterance = new SpeechSynthesisUtterance(text);
+//   lngDetector.setLanguageType('iso2')
+//   lang = lngDetector.detect(text, 1)?.[0]?.[0] ?? 'en'
+//   utterance.lang = lang
+//   speechSynthesis.speak(utterance);
+// }
 
 function stripMarkdown(code: string) {
   let text = code.replace(/`{3}[\s\S]*?`{3}/g, ''); // Remove triple backtick code blocks
@@ -48,7 +48,15 @@ export function ChatWindow(props: {
   const messageContainerRef = useRef<HTMLDivElement | null>(null);
 
   const { endpoint, emptyStateComponent, placeholder, titleText = "An LLM", showIngestForm, showIntermediateStepsToggle, emoji } = props;
-
+  const recognitionRef = useRef<any>(null)
+  const idleTimerRef = useRef<any>(null)
+  /**
+   * stopped: ignoring micro stopped
+   * listening: micro started but no speaking
+   * processing: someone speaking
+   * idle: speaking completed speaking
+   */
+  const microRef = useRef<any>('stopped')
   const [showIntermediateSteps, setShowIntermediateSteps] = useState(false);
   const [isSpeak, setIsSpeak] = useState(true);
   const [intermediateStepsLoading, setIntermediateStepsLoading] = useState(false);
@@ -66,6 +74,15 @@ export function ChatWindow(props: {
       <label htmlFor="show_speak"> Speak</label>
     </div>
   );
+
+  function speak(text: string) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    lngDetector.setLanguageType('iso2')
+    const lang = lngDetector.detect(text, 1)?.[0]?.[0] ?? 'en'
+    recognitionRef.current.lang = langCodes?.[lang] ?? "en-US"
+    utterance.lang = lang
+    speechSynthesis.speak(utterance);
+  }
 
   const [sourcesForMessages, setSourcesForMessages] = useState<Record<string, any>>({});
   const submitRef = useRef<any>(null)
@@ -96,81 +113,104 @@ export function ChatWindow(props: {
       }
     });
 
-  let SpeechRecognition = useRef<any>(null)
-  const recognitionRef = useRef<any>(null)
-  const recognizing = useRef<any>(false)
-  const started = useRef<any>(false)
+
 
 
   useEffect(() => {
     // Weird hack to fix SSR build problem
     if (typeof window !== 'undefined') {
-      SpeechRecognition.current = (window as any)?.webkitSpeechRecognition || (window as any)?.SpeechRecognition
-      recognitionRef.current = new SpeechRecognition.current()
-    }
-
-    timerRef.current = setInterval(() => {
-      try {
-        if (!started.current) {
-          recognitionRef.current.start()
-        }
-      } catch (e) { console.error(e) }
-    }, 1000)
-    return () => { clearInterval(timerRef.current) }
-  }, [])
-
-  function startListening() {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any)?.webkitSpeechRecognition || (window as any)?.SpeechRecognition
+      recognitionRef.current = new SpeechRecognition()
       recognitionRef.current.continuous = true;
+      recognitionRef.current.lang = langCodes['fr']
 
-      // Event handler for speech recognition results
       recognitionRef.current.onresult = function (event: any) {
+        if (idleTimerRef.current) {
+          clearTimeout(idleTimerRef.current)
+        }
+        if (speechSynthesis.speaking) {
+          microRef.current = 'stopped'
+          recognitionRef.current.abort()
+          return;
+        }
+
+        /**
+         * Debounced timer to speed conversation lifecycle
+         * onspeechend is very slow to trigger
+         * therefore, when stop speaking it may take 5-10s
+         * to send request
+         */
+        idleTimerRef.current = setTimeout(() => {
+          if (microRef.current === 'idle') {
+            microRef.current = 'stopped'
+            recognitionRef.current.stop()
+          }
+        }, 3000)
+
+        microRef.current = 'idle'
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const transcript = event.results[i][0].transcript;
-          const language = event.results[i][0].lang;
-          console.log(transcript, language, event);
+          console.log(transcript, event);
           setInput(prev => prev + " " + transcript);
         }
       };
 
       recognitionRef.current.onspeechstart = function (event: any) {
-        recognitionRef.current.lang = langCodes?.[lang] ?? "en-US"
-        console.log('ON speech start');
-        recognizing.current = true;
+        if (speechSynthesis.speaking) {
+          microRef.current = 'stopped'
+          recognitionRef.current.abort()
+          return;
+        }
+
+        microRef.current = 'processing'
+        console.log(`ON speech start in language ${recognitionRef.current.lang}`);
       }
 
       recognitionRef.current.onspeechend = function (event: any) {
+        microRef.current = 'stopped'
+
+        if (speechSynthesis.speaking) {
+          recognitionRef.current.abort()
+          return;
+        }
         console.log('ON speech end');
-        recognizing.current = false;
         recognitionRef.current.stop()
       }
 
-      // Event handler for language detection
       recognitionRef.current.onstart = function () {
-        started.current = true;
-        console.log('ON audio start');
+        console.log(`ON start in language ${recognitionRef.current.lang}`);
         if (speechSynthesis.speaking) {
           console.log('AI Speaking: stoping recognition');
-          recognitionRef.current.stop()
-        } else {
-          console.log('Audio capturing started');
+          microRef.current = 'stopped'
+          recognitionRef.current.abort()
+          return;
         }
 
+        microRef.current = 'listening'
+        console.log('Audio capturing started');
       };
 
-
-
       recognitionRef.current.onend = function () {
-        started.current = false;
+        microRef.current = 'stopped'
         console.log('Audio capturing ended');
         submitRef.current?.click()
         setInput("");
       };
-
-    } else {
-      alert('Web Speech API is not supported in this browser.');
     }
-  }
+
+    timerRef.current = setInterval(() => {
+      try {
+        if (!speechSynthesis.speaking && microRef.current === 'stopped') {
+          microRef.current = 'listening'
+          recognitionRef.current.start()
+        }
+      } catch (e) { console.error(e) }
+    }, 1000)
+    return () => {
+      clearTimeout(idleTimerRef.current)
+      clearInterval(timerRef.current)
+    }
+  }, [])
 
   async function sendMessage(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -223,10 +263,6 @@ export function ChatWindow(props: {
     }
   }
 
-  useEffect(() => {
-    startListening()
-  }, [])
-
   return (
     <div className={`flex flex-col items-center p-4 md:p-8 rounded grow overflow-hidden ${(messages.length > 0 ? "border" : "")}`}>
       <h2 className={`${messages.length > 0 ? "" : "hidden"} text-2xl`}>{emoji} {titleText}</h2>
@@ -271,7 +307,7 @@ export function ChatWindow(props: {
             </div>
             <span className={(chatEndpointIsLoading || intermediateStepsLoading) ? "hidden" : ""}>Send</span>
           </button>
-          <button type='button' className="shrink-0 px-8 py-4 bg-sky-600 rounded w-28" onClick={startListening}>Talk</button>
+          {/* <button type='button' className="shrink-0 px-8 py-4 bg-sky-600 rounded w-28" onClick={initializeListening}>Talk</button> */}
         </div>
       </form>
       <ToastContainer />
