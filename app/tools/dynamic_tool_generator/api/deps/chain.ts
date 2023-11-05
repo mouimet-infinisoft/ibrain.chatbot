@@ -3,12 +3,10 @@ import { ConversationChain } from "langchain/chains";
 import { BufferMemory } from "langchain/memory";
 import { PromptTemplate } from "langchain/prompts";
 import { InputValues } from "langchain/schema";
-console.log(process.env['OPENAI_API_KEY'])
-const chat = new ChatOpenAI();
-
+const chat = new ChatOpenAI({temperature:0.8});
 const memory = new BufferMemory();
 
-export const initChain = async (
+export const initApiChain = async (
   prompt: PromptTemplate<InputValues<"intention">, any>
 ) => {
   const generateRouteChain = new ConversationChain({

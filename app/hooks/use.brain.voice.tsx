@@ -3,7 +3,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useRef, useState, useEffect, useMemo } from "react";
 import LanguageDetect from "languagedetect";
 import brainstack from "./brainstack";
-import { nlp } from "../page";
+import { nlp } from "../../ai/nlp/init";
 const { useBrainStack } = brainstack;
 
 const lngDetector = new LanguageDetect();

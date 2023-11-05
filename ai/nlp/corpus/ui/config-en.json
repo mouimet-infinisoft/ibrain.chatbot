@@ -1,0 +1,27 @@
+{
+  "name": "configuration",
+  "locale": "en-US",
+  "entities": {},
+  "data": [
+    {
+      "intent": "main.panel.configuration.open",
+      "utterances": ["Open configuration", "Show configuration"],
+      "answers": ["Sure.", "There you go.", "In a second."],
+      "actions": [
+        {
+          "name": "main.panel.configuration.open"
+        }
+      ]
+    },
+    {
+      "intent": "main.panel.configuration.close",
+      "utterances": ["Close configuratin", "Hide configuration"],
+      "answers": ["Sure.", "There you go.", "In a second."],
+      "actions": [
+        {
+          "name": "main.panel.configuration.close"
+        }
+      ]
+    }
+  ]
+}

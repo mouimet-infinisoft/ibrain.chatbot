@@ -15,7 +15,6 @@ import { initializeAgentExecutorWithOptions } from "langchain/agents";
 import { sendEmailTool } from "@/app/tools/sendemail";
 import { WebBrowser } from "langchain/tools/webbrowser";
 import { umlTool } from "@/app/tools/uml";
-import { toolGenerator } from "@/app/tools/toolgen";
 import { listFilesTool } from "@/app/tools/fs/list";
 import { readFileTool } from "@/app/tools/fs/read";
 import { createFileTool } from "@/app/tools/fs/create";
@@ -24,7 +23,8 @@ import { createFolderTool } from "@/app/tools/fs/mkdir";
 // import { searchFileTool } from "@/app/tools/fs/search";
 import { deployStoredProcTool } from "@/app/tools/sql/deploy"; // Import the deployStoredProcTool
 import { runSqlQueryTool } from "@/app/tools/sql/run_sql_query";
-import { generateRouteTool } from "@/app/tools/api/route_gen";
+import { generateRouteTool } from "@/app/tools/dynamic_tool_generator/api/generator";
+import { generateToolDynamicTool } from "@/app/tools/dynamic_tool_generator/tool/generator";
 // import { aiExpectationTool } from "@/app/tools/conversation/ai_expectation";
 // import { storeIdentificationTool } from "@/app/tools/conversation/store_identification";
 
@@ -105,20 +105,20 @@ export async function POST(req: NextRequest) {
     const tools = [
       // storeIdentificationTool,
       // aiExpectationTool,
-      generateRouteTool,
-      createFolderTool,
-      updateFileTool,
-      createFileTool,
-      readFileTool,
-      listFilesTool,
-      toolGenerator,
-      umlTool,
-      sendEmailTool,
-      runSqlQueryTool,
+      // createFolderTool,
+      // updateFileTool,
+      // createFileTool,
+      // readFileTool,
+      // listFilesTool,
+      // umlTool,
+      // sendEmailTool,
+      // runSqlQueryTool,
       // new SerpAPI(),
-      new WebBrowser({ model, embeddings: new OpenAIEmbeddings() }),
+      // new WebBrowser({ model, embeddings: new OpenAIEmbeddings() }),
       // searchFileTool,
-      deployStoredProcTool, // Include the deployStoredProcTool in the tools array
+      // deployStoredProcTool, 
+      generateRouteTool,
+      generateToolDynamicTool
     ];
 
     const executor = await initializeAgentExecutorWithOptions(tools, model, {
@@ -130,6 +130,8 @@ export async function POST(req: NextRequest) {
         prefix: TEMPLATE,
       },
     });
+
+
 
     const result = await executor.call({
       input: currentMessageContent,

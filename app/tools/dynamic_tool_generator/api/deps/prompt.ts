@@ -1,5 +1,9 @@
-import { intention2codeTemplate } from "./template";
-const requirements = `1. Language is `;
+import { intention2codeTemplate } from "../../../../../ai/prompt_templates/intention2codeTemplate";
+
+const requirements = `1. Language is Typescript.
+2. Template structure must be respected.
+3. Use fetch only, anything else is not authorized. For example: Axios is not allowed.
+4. Assume any secret are available from process.env['SECRET']`
 
 const template = `
 const express = require('express');
@@ -18,7 +22,7 @@ router.post('/search', (req, res) => {
 module.exports = router;
 `;
 
-const example = `
+const example2 = `
 const express = require('express');
 const fs = require('fs');
 const router = express.Router();
@@ -39,8 +43,8 @@ router.post('/search', (req, res) => {
 
 module.exports = router;
 `;
-
-export const initPrompts = async () => {
+const example = ""
+export const initApiPrompts = async () => {
   const intention2jsExpressRouterPrompt = await intention2codeTemplate.partial({
     requirements,
     example,

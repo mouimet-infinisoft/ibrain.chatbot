@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SelectableToolContextPanel from "./SelectableToolContextPanel";
 import "./styles.css";
 
@@ -23,6 +23,34 @@ const ToolContainer: React.FC<ToolContainerProps> = ({
   const handleToolSelect = (tool: string) => {
     setSelectedTool((prev) => (prev === tool ? "" : tool));
   };
+
+  useEffect(() => {
+    const handleShowConfig = () => {
+      setSelectedTool("Config");
+    };
+    const handleHideConfig = () => {
+      setSelectedTool("");
+    };
+    document.addEventListener(
+      "main.panel.configuration.open",
+      handleShowConfig
+    );
+    document.addEventListener(
+      "main.panel.configuration.close",
+      handleHideConfig
+    );
+
+    return () => {
+      document.removeEventListener(
+        "main.panel.configuration.open",
+        handleShowConfig
+      );
+      document.removeEventListener(
+        "main.panel.configuration.close",
+        handleHideConfig
+      );
+    };
+  }, []);
 
   return (
     <div

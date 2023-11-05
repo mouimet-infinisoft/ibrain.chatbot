@@ -1,0 +1,27 @@
+{
+  "name": "chat_input",
+  "locale": "en-US",
+  "entities": {},
+  "data": [
+    {
+      "intent": "main.footer.chat.open",
+      "utterances": ["Open chat inpuit", "Show chat input"],
+      "answers": ["Sure.", "There you go.", "In a second."],
+      "actions": [
+        {
+          "name": "main.footer.chat.open"
+        }
+      ]
+    },
+    {
+      "intent": "main.footer.chat.close",
+      "utterances": ["Close chat input", "Hide chat input"],
+      "answers": ["Sure.", "There you go.", "In a second."],
+      "actions": [
+        {
+          "name": "main.footer.chat.close"
+        }
+      ]
+    }
+  ]
+}

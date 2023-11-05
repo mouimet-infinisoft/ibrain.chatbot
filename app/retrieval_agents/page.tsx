@@ -4,7 +4,7 @@ import { ChatWindow } from "@/components/ChatWindow";
 import { useEffect } from "react";
 import { getCookie, setCookie } from "../helpers/cookie";
 import brainstack from "@/app/hooks/brainstack";
-import { nlp } from "../page";
+import { nlp } from "../../ai/nlp/init";
 const { core, useBrainStack, createEventHandlerMutatorShallow, getValue } =
   brainstack;
 

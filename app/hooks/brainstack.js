@@ -15,7 +15,7 @@ const options = {
   loggerOptions: [5],
 };
 
-const {
+export const {
   BrainStackProvider,
   useBrainStack,
   core,
