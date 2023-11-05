@@ -20,13 +20,17 @@ import { listFilesTool } from "@/app/tools/fs/list";
 import { readFileTool } from "@/app/tools/fs/read";
 import { createFileTool } from "@/app/tools/fs/create";
 import { updateFileTool } from "@/app/tools/fs/update";
+import { createFolderTool } from "@/app/tools/fs/mkdir";
+
 // import { searchFileTool } from "@/app/tools/fs/search";
-import { deployStoredProcTool } from '@/app/tools/sql/deploy'; // Import the deployStoredProcTool
+import { deployStoredProcTool } from "@/app/tools/sql/deploy"; // Import the deployStoredProcTool
+import { runSqlQueryTool } from "@/app/tools/sql/run_sql_query";
 // import { aiExpectationTool } from "@/app/tools/conversation/ai_expectation";
 // import { storeIdentificationTool } from "@/app/tools/conversation/store_identification";
 
 export const runtime = "edge";
-
+process.env["OPENAI_API_KEY"] =
+  "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";
 const MAX_TOKENS = 4000;
 
 async function limitTokens(chatHistory: ChatMessageHistory) {
@@ -43,9 +47,7 @@ async function limitTokens(chatHistory: ChatMessageHistory) {
   return new ChatMessageHistory(limitedMessages);
 }
 
-const convertVercelMessageToLangChainMessage = (
-  message: VercelChatMessage
-) => {
+const convertVercelMessageToLangChainMessage = (message: VercelChatMessage) => {
   if (message.role === "user") {
     return new HumanMessage(message.content);
   } else if (message.role === "assistant") {
@@ -70,7 +72,8 @@ export async function POST(req: NextRequest) {
     const currentMessageContent = messages[messages.length - 1].content;
 
     const model = new ChatOpenAI({
-      modelName: "gpt-3.5-turbo-16k"
+      modelName: "gpt-3.5-turbo-16k",
+      temperature: 0.8,
     });
 
     // const client = createClient(
@@ -87,14 +90,16 @@ export async function POST(req: NextRequest) {
     //   previousMessages.map(convertVercelMessageToLangChainMessage)
     // );
     const limitedChatHistory = await limitTokens(
-      new ChatMessageHistory(previousMessages.map(convertVercelMessageToLangChainMessage))
+      new ChatMessageHistory(
+        previousMessages.map(convertVercelMessageToLangChainMessage)
+      )
     );
 
     const memory = new OpenAIAgentTokenBufferMemory({
       llm: model,
       memoryKey: "chat_history",
       outputKey: "output",
-      chatHistory: limitedChatHistory
+      chatHistory: limitedChatHistory,
     });
 
     // const retriever = vectorstore.asRetriever();
@@ -102,6 +107,7 @@ export async function POST(req: NextRequest) {
     const tools = [
       // storeIdentificationTool,
       // aiExpectationTool,
+      createFolderTool,
       updateFileTool,
       createFileTool,
       readFileTool,
@@ -109,10 +115,11 @@ export async function POST(req: NextRequest) {
       toolGenerator,
       umlTool,
       sendEmailTool,
+      runSqlQueryTool,
       // new SerpAPI(),
       new WebBrowser({ model, embeddings: new OpenAIEmbeddings() }),
       // searchFileTool,
-      deployStoredProcTool // Include the deployStoredProcTool in the tools array
+      deployStoredProcTool, // Include the deployStoredProcTool in the tools array
     ];
 
     const executor = await initializeAgentExecutorWithOptions(tools, model, {
@@ -121,12 +128,12 @@ export async function POST(req: NextRequest) {
       returnIntermediateSteps: true,
       verbose: true,
       agentArgs: {
-        prefix: TEMPLATE
-      }
+        prefix: TEMPLATE,
+      },
     });
 
     const result = await executor.call({
-      input: currentMessageContent
+      input: currentMessageContent,
     });
 
     if (returnIntermediateSteps) {
@@ -146,7 +153,7 @@ export async function POST(req: NextRequest) {
           //   // await new Promise(resolve => setTimeout(resolve, 1));
           // }
           controller.close();
-        }
+        },
       });
 
       return new StreamingTextResponse(fakeStream);

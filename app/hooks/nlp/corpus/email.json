@@ -1,0 +1,59 @@
+{
+    "name": "Email Sending",
+    "locale": "en-US",
+    "entities": {
+      "toEmailAddress": {
+        "trim": [
+          {
+            "position": "afterLast",
+            "words": ["email to", "send to"]
+          }
+        ]
+      },
+      "subject": {
+        "trim": [
+          {
+            "position": "afterLast",
+            "words": ["subject", "about"]
+          }
+        ]
+      },
+      "message": {
+        "trim": [
+          {
+            "position": "afterLast",
+            "words": ["message", "saying", "that says"]
+          }
+        ]
+      }
+    },
+    "data": [
+      {
+        "intent": "sendEmail",
+        "utterances": [
+          "I need to send an email to @toEmailAddress about @subject that says @message",
+          "Please email @toEmailAddress regarding @subject with the following message: @message",
+          "Compose an email to @toEmailAddress with the subject @subject and message @message",
+          "Email @toEmailAddress about @subject saying @message",
+          "Send an email to @toEmailAddress concerning @subject that says @message"
+        ],
+        "answers": [
+          "Sure, I will send an email to {{toEmailAddress}} with the subject '{{subject}}' and the message '{{message}}'."
+        ],
+        "slotFilling": {
+          "toEmailAddress": {
+            "mandatory": true,
+            "question": "What's the email address of the recipient?"
+          },
+          "subject": {
+            "mandatory": true,
+            "question": "What is the subject of the email?"
+          },
+          "message": {
+            "mandatory": true,
+            "question": "What would you like to say in your message?"
+          }
+        }
+      }
+    ]
+  }

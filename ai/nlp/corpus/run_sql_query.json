@@ -1,0 +1,59 @@
+{
+  "name": "run_sql_query",
+  "locale": "en-US",
+  "entities": {
+    "databaseName": {
+      "trim": [
+        {
+          "position": "afterLast",
+          "words": ["database", "db"]
+        }
+      ]
+    },
+    "queryType": {
+      "trim": [
+        {
+          "position": "afterLast",
+          "words": ["type", "kind", "category"]
+        }
+      ]
+    },
+    "queryContent": {
+      "trim": [
+        {
+          "position": "afterLast",
+          "words": ["run", "execute", "perform"]
+        }
+      ]
+    }
+  },
+  "data": [
+    {
+      "intent": "runQuery",
+      "utterances": [
+        "I need to run a @queryType query on @databaseName with @queryContent",
+        "Please execute this SQL query on @databaseName: @queryContent",
+        "Run a @queryType query on the database @databaseName",
+        "Perform a query on @databaseName that @queryContent",
+        "Execute the following SQL on @databaseName: @queryContent"
+      ],
+      "answers": [
+        "Executing your {{queryType}} query on {{databaseName}}: '{{queryContent}}'."
+      ],
+      "slotFilling": {
+        "databaseName": {
+          "mandatory": true,
+          "question": "Which database should the query be run against?"
+        },
+        "queryType": {
+          "mandatory": true,
+          "question": "What type of query would you like to perform? (e.g., SELECT, INSERT, UPDATE, DELETE)"
+        },
+        "queryContent": {
+          "mandatory": true,
+          "question": "Please provide the SQL query content."
+        }
+      }
+    }
+  ]
+}

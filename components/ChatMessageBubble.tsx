@@ -2,6 +2,7 @@ import type { Message } from "ai/react";
 import ReactMarkdown from 'react-markdown';
 
 export function ChatMessageBubble(props: { message: Message, aiEmoji?: string, sources: any[] }) {
+  console.log(JSON.stringify(props))
   const colorClassName =
     props.message.role === "user" ? "bg-sky-600" : "bg-slate-50 text-black";
   const alignmentClassName =

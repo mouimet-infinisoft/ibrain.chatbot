@@ -1,12 +1,14 @@
 import { DynamicTool } from 'langchain/tools';
 
-async function sendEmail(content: string, title: string, destination: string): Promise<void> {
-    const apiUrl = 'https://apis-alpha.vercel.app/sendemail';
+async function sendEmail(content: string, title: string, attachment:string, destination: string): Promise<void> {
+    // const apiUrl = 'https://apis-alpha.vercel.app/sendemail';
+    const apiUrl = 'http://localhost:3010/email/send';
 
     const payload = {
         content,
         title,
         destination,
+        attachment
     };
 
     await fetch(apiUrl, {
@@ -20,12 +22,13 @@ async function sendEmail(content: string, title: string, destination: string): P
 
 export const sendEmailTool = new DynamicTool({
     name: "send_email",
-    description: 'Useful to send emails. The input to this tool should be a comma separated list, representing the address, subject, message. For example, `info@example.com,follow up,Hi john how are you?` would be the input if you wanted to send an email at info@example.com with subject follow up and message Hi john how are you?',
+    description: 'Useful to send emails. The input to this tool should be a comma separated list, representing the address, subject, attachments, message. For example, `info@example.com,follow up, ,Hi john how are you?` would be the input if you wanted to send an email without attachement at info@example.com with subject follow up and message Hi john how are you?',
     func: async (args) => {
         console.log(args)
-        const [address, subject, ...message] = args.split(',')
+        const [address, subject, attachment, ...message] = args.split(',')
         console.log(address)
         console.log(subject)
+        console.log(attachment)
         console.log(message.join(''))
 
         if (!address){
@@ -41,7 +44,7 @@ export const sendEmailTool = new DynamicTool({
         }
 
         try {
-            await sendEmail(message.join(''), subject, address)
+            await sendEmail(message.join(''), subject, attachment, address)
             return "Email sent sucessfully."
         } catch (err: any) {
             return "Failed to send email. Error message is " + err?.message

@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "format": "prettier --write \"app\""
+    "format": "prettier --write \"app\"",
+    "browserdist": "browserify ./index.js | terser --compress --mangle > ./bundle.js"
   },
   "engines": {
     "node": ">=18"
@@ -38,5 +39,12 @@
     "typescript": "5.1.6",
     "zod": "^3.22.3",
     "zod-to-json-schema": "^3.21.4"
+  },
+  "devDependencies": {
+    "@nlpjs/basic": "^4.27.0",
+    "@nlpjs/builtin-microsoft": "^4.26.1",
+    "@nlpjs/lang-fr": "^4.26.1",
+    "browserify": "^17.0.0",
+    "terser": "^5.24.0"
   }
 }

@@ -1,0 +1,52 @@
+{
+  "name": "email_sending_fr",
+  "locale": "fr-FR",
+  "entities": {
+    "toEmailAddress":  "/\\b(\\w[-._\\w]*\\w@\\w[-._\\w]*\\w\\.\\w{2,3})\\b/gi",
+    "subject": {
+      "trim": [
+        {
+          "position": "afterLast",
+          "words": ["sujet", "concernant"]
+        }
+      ]
+    },
+    "message": {
+      "trim": [
+        {
+          "position": "afterLast",
+          "words": ["message", "disant", "qui dit"]
+        }
+      ]
+    }
+  },
+  "data": [
+    {
+      "intent": "sendEmail",
+      "utterances": [
+        "J'ai besoin d'envoyer un courriel à @toEmailAddress concernant @subject qui dit @message",
+        "Veuillez envoyer un courriel à @toEmailAddress concernant @subject avec le message suivant : @message",
+        "Composez un courriel pour @toEmailAddress avec le sujet @subject et le message @message",
+        "Envoyez un courriel à @toEmailAddress à propos de @subject disant @message",
+        "Envoyez un courriel à @toEmailAddress concernant @subject qui dit @message"
+      ],
+      "answers": [
+        "Bien sûr, je vais envoyer un courriel à {{toEmailAddress}} avec le sujet '{{subject}}' et le message '{{message}}'."
+      ],
+      "slotFilling": {
+        "toEmailAddress": {
+          "mandatory": true,
+          "question": "Quelle est l'adresse courriel du destinataire ?"
+        },
+        "subject": {
+          "mandatory": true,
+          "question": "Quel est le sujet du courriel ?"
+        },
+        "message": {
+          "mandatory": true,
+          "question": "Que souhaitez-vous dire dans votre message ?"
+        }
+      }
+    }
+  ]
+}

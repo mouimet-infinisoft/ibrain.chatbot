@@ -12,11 +12,11 @@ export const toolGenerator = new DynamicTool({
     
             Here is an example of a tool to send email, it is mandatory to use DynamicTool class and func must be async:
             
-            import axios from 'axios';
         import { DynamicTool } from 'langchain/tools';
         
         async function sendEmail(content: string, title: string, destination: string): Promise<void> {
          // implementation
+         // Always use fetch to call external api
         }
         
         export const sendEmailTool = new DynamicTool({
