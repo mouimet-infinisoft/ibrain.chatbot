@@ -1,5 +1,6 @@
 "use client";
 import ChatInput from "@/components/next-ui/ChatInput/ChatInput";
+import MainCard from "@/components/next-ui/MainCard/MainCard";
 import ToolContainer, {
   Tool,
 } from "@/components/next-ui/SelectableToolContextPanel/ToolContainer";
@@ -18,20 +19,29 @@ const rightSide: Tool[] = [
 ];
 
 export default function AgentsPage() {
-  const [visible, setVisible] = useState(true)
+  const [visible, setVisible] = useState(true);
   return (
     <>
       <div style={{ display: "flex", alignContent: "space-between" }}>
         <div style={{ flex: 1 }}>
           <ToolContainer tools={leftSide} />
         </div>
+        <div style={{ flex: "1 1" }}>
+          <MainCard />
+        </div>
         <div style={{ flex: 1 }}>
           <ToolContainer tools={rightSide} reverse />
         </div>
       </div>
       <div>
-        <button onClick={()=>{setVisible(prev => !prev)}}>Toggle button</button>
-        <ChatInput visible={visible}/>
+        <button
+          onClick={() => {
+            setVisible((prev) => !prev);
+          }}
+        >
+          Toggle button
+        </button>
+        <ChatInput visible={visible} />
       </div>
     </>
   );

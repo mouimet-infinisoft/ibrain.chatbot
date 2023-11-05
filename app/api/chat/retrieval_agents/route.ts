@@ -21,16 +21,14 @@ import { readFileTool } from "@/app/tools/fs/read";
 import { createFileTool } from "@/app/tools/fs/create";
 import { updateFileTool } from "@/app/tools/fs/update";
 import { createFolderTool } from "@/app/tools/fs/mkdir";
-
 // import { searchFileTool } from "@/app/tools/fs/search";
 import { deployStoredProcTool } from "@/app/tools/sql/deploy"; // Import the deployStoredProcTool
 import { runSqlQueryTool } from "@/app/tools/sql/run_sql_query";
+import { generateRouteTool } from "@/app/tools/api/route_gen";
 // import { aiExpectationTool } from "@/app/tools/conversation/ai_expectation";
 // import { storeIdentificationTool } from "@/app/tools/conversation/store_identification";
 
 export const runtime = "edge";
-process.env["OPENAI_API_KEY"] =
-  "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";
 const MAX_TOKENS = 4000;
 
 async function limitTokens(chatHistory: ChatMessageHistory) {
@@ -107,6 +105,7 @@ export async function POST(req: NextRequest) {
     const tools = [
       // storeIdentificationTool,
       // aiExpectationTool,
+      generateRouteTool,
       createFolderTool,
       updateFileTool,
       createFileTool,

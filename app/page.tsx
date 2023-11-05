@@ -3,6 +3,8 @@
 import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
 import { enDataSet } from "./hooks/nlp/datasets/en";
+import dotenv from 'dotenv'
+dotenv.config()
 // import { frDataSet } from "./hooks/nlp/fr";
 
 // Dynamically import BrainStackProvider and AgentsPage
