@@ -25,7 +25,6 @@ export default function RootLayout({
         <meta name="twitter:title" content="iBrain AI Companion" />
         <meta name="twitter:description" content="iBrain AI Companion" />
         <meta name="twitter:image" content="/images/og-image.png" />
-        <script src="/assets/js/bundle.js"></script>
       </head>
       <body className={publicSans.className}>
         <div className="flex flex-col p-4 md:p-12 h-[100vh]">
