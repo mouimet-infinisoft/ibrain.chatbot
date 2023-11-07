@@ -4,22 +4,22 @@
   "entities": {},
   "data": [
     {
-      "intent": "main.panel.configuration.open",
+      "intent": "communication.request.ui.main.panel.configuration.open",
       "utterances": ["Open configuration", "Show configuration"],
       "answers": ["Sure.", "There you go.", "In a second."],
       "actions": [
         {
-          "name": "main.panel.configuration.open"
+          "name": "communication.request.ui.main.panel.configuration.open"
         }
       ]
     },
     {
-      "intent": "main.panel.configuration.close",
-      "utterances": ["Close configuratin", "Hide configuration"],
+      "intent": "communication.request.ui.main.panel.configuration.close",
+      "utterances": ["Close configuration", "Hide configuration"],
       "answers": ["Sure.", "There you go.", "In a second."],
       "actions": [
         {
-          "name": "main.panel.configuration.close"
+          "name": "communication.request.ui.main.panel.configuration.close"
         }
       ]
     }

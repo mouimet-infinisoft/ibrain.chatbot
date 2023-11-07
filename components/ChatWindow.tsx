@@ -109,33 +109,33 @@ export function ChatWindow(props: {
     // append({ id: generateUUID(), role: "user", content });
   }, []);
 
-  bstack.useOn("ibrain.voice.message.complex", (payload: any) => {
-    bstack.log.info("ibrain.voice.message.complex");
-    bstack.log.info(payload);
-    setInput((prev) => prev + " " + payload?.utterance);
-  });
+  // bstack.useOn("request.complex.reasoning", (payload: any) => {
+  //   bstack.log.info("request.complex.reasoning");
+  //   bstack.log.info(payload);
+  //   setInput((prev) => prev + " " + payload?.utterance);
+  // },[setInput, bstack]);
 
-  useEffect(() => {
-    return bstack.store.on("ibrain.voice.message.nlp", (payload: any) => {
-      bstack.log.info("ibrain.voice.message.nlp");
-      bstack.log.info(payload);
-      const _newMessages: Message[] = [
-        ...messages,
-        {
-          id: generateUUID(),
-          content: payload?.utterance,
-          role: "user",
-        },
-        {
-          id: generateUUID(),
-          content: payload?.answer,
-          role: "assistant",
-        },
-      ];
-      bstack.log.info(_newMessages);
-      setMessages(_newMessages);
-    });
-  }, [messages, setMessages, generateUUID]);
+  // useEffect(() => {
+  //   return bstack.store.on("sharing.basic.reasoning", (payload: any) => {
+  //     bstack.log.info("sharing.basic.reasoning");
+  //     bstack.log.info(payload);
+  //     const _newMessages: Message[] = [
+  //       ...messages,
+  //       {
+  //         id: generateUUID(),
+  //         content: payload?.utterance,
+  //         role: "user",
+  //       },
+  //       {
+  //         id: generateUUID(),
+  //         content: payload?.answer,
+  //         role: "assistant",
+  //       },
+  //     ];
+  //     bstack.log.info(_newMessages);
+  //     setMessages(_newMessages);
+  //   });
+  // }, [messages, setMessages, generateUUID]);
 
   bstack.useOn("ibrain.voice.message.nlp", (payload: any) => {
     bstack.log.info("ibrain.voice.message.nlp");
@@ -155,17 +155,17 @@ export function ChatWindow(props: {
     ];
     bstack.log.info(_newMessages);
     setMessages(_newMessages);
-  });
+  },[setMessages,bstack]);
 
   bstack.useOn("ibrain.voice.thought", ({ message }: any) => {
     bstack.log.info(message);
     append(message);
-  });
+  },[append, bstack]);
 
   bstack.useOn("ibrain.voice.end", () => {
     submitRef.current?.click();
     setInput("");
-  });
+  },[setInput, submitRef]);
 
   async function sendMessage(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();

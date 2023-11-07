@@ -4,22 +4,22 @@
   "entities": {},
   "data": [
     {
-      "intent": "main.footer.chat.open",
-      "utterances": ["Open chat inpuit", "Show chat input"],
+      "intent": "communication.request.ui.footer.chat.open",
+      "utterances": ["Open chat input", "Show chat input"],
       "answers": ["Sure.", "There you go.", "In a second."],
       "actions": [
         {
-          "name": "main.footer.chat.open"
+          "name": "communication.request.ui.footer.chat.open"
         }
       ]
     },
     {
-      "intent": "main.footer.chat.close",
+      "intent": "communication.request.ui.footer.chat.close",
       "utterances": ["Close chat input", "Hide chat input"],
       "answers": ["Sure.", "There you go.", "In a second."],
       "actions": [
         {
-          "name": "main.footer.chat.close"
+          "name": "communication.request.ui.footer.chat.close"
         }
       ]
     }

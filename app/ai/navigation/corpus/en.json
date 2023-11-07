@@ -1,0 +1,43 @@
+{
+  "name": "navigation",
+  "locale": "en-US",
+  "entities": {},
+  "data": [
+    {
+      "intent": "communication.request.ui.navigate.to.chat",
+      "utterances": [
+        "I need to access the chat",
+        "Can you take me to the chat window?",
+        "How do I get to the chat?"
+      ],
+      "answers": [
+        "Navigating to chat now.",
+        "Opening the chat window for you.",
+        "Taking you to the chat, one moment."
+      ],
+      "actions": [
+        {
+          "name": "work.action.ui.navigate.to.chat"
+        }
+      ]
+    },
+    {
+      "intent": "communication.request.ui.navigate.to.home",
+      "utterances": [
+        "Go to the home screen",
+        "I want to see the home page",
+        "Can I go back to home?"
+      ],
+      "answers": [
+        "Sure, heading to the home screen.",
+        "Redirecting you to the home page now.",
+        "Yes, going back to the home screen."
+      ],
+      "actions": [
+        {
+          "name": "work.action.ui.navigate.to.home"
+        }
+      ]
+    }
+  ]
+}

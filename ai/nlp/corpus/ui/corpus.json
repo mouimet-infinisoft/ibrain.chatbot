@@ -1,0 +1,19 @@
+{
+    "name": "chat_input",
+    "locale": "en-US",
+    "entities": {
+        "component":{}
+    },
+    "data": [
+      {
+        "intent": "communication.request.ui.{{component}}.open",
+        "utterances": ["Open {{component}}", "Show {{component}}"],
+        "actions": [
+          {
+            "name": "communication.request.ui.{{component}}.open"
+          }
+        ]
+      }    
+    ]
+  }
+  

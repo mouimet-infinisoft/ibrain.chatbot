@@ -1,7 +1,9 @@
 import { enDataSet } from './datasets/en.js'
 import chatinput from './corpus/ui/chat-input-en.json'
 import config from './corpus/ui/config-en.json'
+import navigationCorpus from '../../app/ai/navigation/corpus/en.json'
 import activeListen from './corpus/humanity/active-listening-em.json'
+import { core } from '@/app/hooks/brainstack.js';
 export let _nlplib;
 export let nlp;
 
@@ -27,60 +29,61 @@ const init = async () => {
         nlp = container.get("nlp");
         nlp.settings.autoSave = false;
         nlp.addLanguage("en");
-        loadNlpData(nlp, enDataSet);
+        // loadNlpData(nlp, enDataSet);
         nlp.addCorpus(chatinput)
         nlp.addCorpus(config)
-        nlp.addCorpus(activeListen)
+        nlp.addCorpus(navigationCorpus)
+        // nlp.addCorpus(activeListen)
         console.log(nlp)
-        
-        nlp.registerActionFunction('main.panel.configuration.open', () => {
-            console.log('main.panel.configuration.open')
-            document.dispatchEvent(new CustomEvent('main.panel.configuration.open'))
-            return Promise.resolve()
-        });
-        nlp.registerActionFunction('main.panel.configuration.close', () => {
-            console.log('chat.input.close')
-            document.dispatchEvent(new CustomEvent('main.panel.configuration.close'))
-            return Promise.resolve()
-        });
-        nlp.registerActionFunction('main.footer.chat.open', () => {
-            console.log('main.footer.chat.open')
-            document.dispatchEvent(new CustomEvent('main.footer.chat.open'))
-            return Promise.resolve()
-        });
-        nlp.registerActionFunction('main.footer.chat.close', () => {
-            console.log('main.footer.chat.close')
-            document.dispatchEvent(new CustomEvent('main.footer.chat.close'))
-            return Promise.resolve()
+
+        nlp.registerActionFunction('communication.request.ui.main.panel.configuration.open', (d) => {
+            core.log.info('communication.request.ui.main.panel.configuration.open', d);
+            core.store.emit('communication.request.ui.main.panel.configuration.open', d);
+            return Promise.resolve(d); // Assuming the function should return a 
         });
 
-
-        nlp.registerActionFunction('accept.active.listeninge', () => {
-            console.log('accept.active.listening')
-            document.dispatchEvent(new CustomEvent('accept.active.listening'))
-            return Promise.resolve()
-        });
-        nlp.registerActionFunction('inform.finished.speaking', () => {
-            console.log('inform.finished.speaking')
-            document.dispatchEvent(new CustomEvent('inform.finished.speaking'))
-            return Promise.resolve()
+        nlp.registerActionFunction('communication.request.ui.main.panel.configuration.close', (d) => {
+            core.log.info('communication.request.ui.main.panel.configuration.close', d);
+            core.store.emit('communication.request.ui.main.panel.configuration.close', d);
+            return Promise.resolve(d);
         });
 
-
-
-
-
-
-        nlp.registerActionFunction('accept.active.listening', async (...d) => {
-            console.log('accept.active.listening ', d)
-            document.dispatchEvent(new CustomEvent('accept.active.listening'))
-            return Promise.resolve()
+        nlp.registerActionFunction('communication.request.ui.footer.chat.close', (d) => {
+            core.log.info('communication.request.ui.footer.chat.close', d);
+            core.store.emit('communication.request.ui.footer.chat.close', d);
+            return Promise.resolve(d);
         });
-        nlp.registerActionFunction('inform.finished.speaking', (...d) => {
-            console.log('inform.finished.speaking', d)
-            document.dispatchEvent(new CustomEvent('inform.finished.speaking'))
-            return Promise.reject("I dont give a fuck!")
+
+        nlp.registerActionFunction('communication.request.ui.footer.chat.open', (d) => {
+            core.log.info('communication.request.ui.footer.chat.open', d);
+            core.store.emit('communication.request.ui.footer.chat.open', d);
+            return Promise.resolve(d);
         });
+
+        // nlp.registerActionFunction('communication.request.expectation.active.listening.required', (d) => {
+        //     core.log.info('communication.request.expectation.active.listening.required', d);
+        //     core.store.emit('communication.request.expectation.active.listening.required', d);
+        //     return Promise.resolve(d);
+        // });
+
+        // nlp.registerActionFunction('communication.request.accepted.expect.active.listening.activated', (d) => {
+        //     core.log.info('communication.request.accepted.expect.active.listening.activated', d);
+        //     core.store.emit('communication.request.accepted.expect.active.listening.activated', d);
+        //     return Promise.resolve(d);
+        // });
+
+        // nlp.registerActionFunction('communication.inform.expectation.active.listening.finished', (d) => {
+        //     core.log.info('communication.inform.expectation.active.listening.finished', d);
+        //     core.store.emit('communication.inform.expectation.active.listening.finished', d);
+        //     return Promise.resolve(d);
+        // });
+
+        // nlp.registerActionFunction('communication.request.expectation.wait.delay.thinking', (d) => {
+        //     core.log.info('communication.request.expectation.wait.delay.thinking', d);
+        //     core.store.emit('communication.request.expectation.wait.delay.thinking', d);
+        //     return Promise.resolve(d);
+        // });
+
 
         await nlp.train();
     };

@@ -1,11 +1,12 @@
 {
-    "name": "active_listening",
-    "locale": "en-US",
-    "entities": {},
-    "data": [
-      {
-        "intent": "ask.active.listening",
-        "utterances": ["Please hear me out before you respond.",
+  "name": "active_listening",
+  "locale": "en-US",
+  "entities": {},
+  "data": [
+    {
+      "intent": "communication.request.expectation.active.listening.required",
+      "utterances": [
+        "Please hear me out before you respond.",
         "I'd appreciate it if you could listen to all I have to say first.",
         "Could you please give me your full attention until I've finished?",
         "I need to express my thoughts completely; please wait until I'm done.",
@@ -24,87 +25,30 @@
         "Please let me finish my train of thought before jumping in.",
         "I ask that you don't interrupt me until I'm finished speaking.",
         "Allow me the chance to express myself fully before we have a dialogue.",
-        "Please be patient and let me speak until I indicate I'm done."],
-        "answers":  [
-            "Absolutely, go ahead.",
-            "I'm all ears.",
-            "Of course, I'll listen.",
-            "You have my full attention.",
-            "Certainly, take your time.",
-            "Please proceed, I'm listening.",
-            "Sure, I won't interrupt.",
-            "Go on, I'm keen to hear everything.",
-            "I'll hold off any questions until you're done.",
-            "Understood, you have the floor.",
-            "Listening intently, continue.",
-            "I promise to listen quietly.",
-            "I'm here to listen, not to speak.",
-            "You've got my undivided attention.",
-            "Speak freely, I'm listening carefully.",
-            "Okay, I'll wait until you signal you're finished.",
-            "I respect that, please tell me everything.",
-            "Not a word from me until you're finished.",
-            "I won't say a thing until you're done.",
-            "Take all the time you need, I'm listening."
-        ],
-        "actions": [
-          {
-            "name": "accept.active.listening"
-          }
-        ]
-      },
-      {
-        "intent": "inform.finished.speaking",
-        "utterances": [
-            "Now that I've explained my part, I'd like to hear your thoughts.",
-            "I've had my say; what's your take on this?",
-            "Your feedback would be valuable now that I've finished speaking.",
-            "I'm interested in your opinion on what I've just said.",
-            "Please share your perspective; I'm all ears.",
-            "I'd love to hear your thoughts now.",
-            "Feel free to add your input now that I've shared mine.",
-            "What do you think about the points I've made?",
-            "Your turn to speak; what are your views?",
-            "I've finished explaining; what's your reaction?",
-            "I'm done now, and I'd like to know your opinions.",
-            "Now it's your time to contribute; please, go ahead.",
-            "Let's hear your side of the story now.",
-            "I've said what I wanted to; what are your thoughts?",
-            "The floor is yours; what do you have to say?",
-            "I've presented my perspective; how do you see it?",
-            "It's your turn to speak; what's on your mind?",
-            "I'd appreciate your thoughts on my explanation.",
-            "Now that I've finished my point, I'm eager to hear yours.",
-            "Please tell me your view now that I've explained mine."
-        ],
-        "answers": [
-            "Thank you for sharing, I have a few thoughts.",
-            "I appreciate you explaining that, here's what I think.",
-            "Now that I've heard you out, I'd like to add my perspective.",
-            "You've made some good points, and I'd like to build on them.",
-            "I understand your position; here's my response.",
-            "Thanks for the detail; it's clearer to me now. My take is...",
-            "I'm glad you shared that; it gives me a lot to consider. Here's my view...",
-            "Now that I've listened to your point, I think I can contribute...",
-            "It's helpful to hear your thoughts; here are mine in return.",
-            "I'm ready to respond now, thank you for explaining.",
-            "I've taken in what you've said, and I have some ideas.",
-            "You've given me a lot to think about, and I'd like to add...",
-            "Your explanation was thorough; my reaction is...",
-            "I respect your points; now, let me share mine.",
-            "I've carefully considered your words, and I believe...",
-            "That was insightful; I have a few comments to add.",
-            "I see where you're coming from. In response, I'd say...",
-            "Your perspective is clear to me now. Here's a different angle.",
-            "Listening to you was beneficial; now, here's my stance.",
-            "Your points are well-taken. Here's my addition to the discussion."
-        ],
-        "actions": [
-          {
-            "name": "ask.delay.thinking"
-          }
-        ]
-      }
-    ]
-  }
-  
+        "Please be patient and let me speak until I indicate I'm done."
+      ],
+      "answers": [
+        "Absolutely, go ahead.",
+        "I'm all ears.",
+        "Of course, I'll listen.",
+        "You have my full attention.",
+        "Certainly, take your time.",
+        "Please proceed, I'm listening.",
+        "Sure, I won't interrupt.",
+        "Go on, I'm keen to hear everything.",
+        "I'll hold off any questions until you're done.",
+        "Understood, you have the floor.",
+        "Listening intently, continue.",
+        "I promise to listen quietly.",
+        "I'm here to listen, not to speak.",
+        "You've got my undivided attention.",
+        "Speak freely, I'm listening carefully.",
+        "Okay, I'll wait until you signal you're finished.",
+        "I respect that, please tell me everything.",
+        "Not a word from me until you're finished.",
+        "I won't say a thing until you're done.",
+        "Take all the time you need, I'm listening."
+      ]
+    }
+  ]
+}
