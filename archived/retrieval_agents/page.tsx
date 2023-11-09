@@ -2,7 +2,7 @@
 
 import { ChatWindow } from "@/components/ChatWindow";
 import { useEffect } from "react";
-import { getCookie, setCookie } from "../../app/helpers/cookie";
+import { getCookie, setCookie } from "../../../ibrain.chat/src/helpers/cookie";
 import brainstack from "@/app/hooks/brainstack";
 import { nlp } from "../../ai/nlp/init";
 import { useBrainVoice } from "../../app/hooks/use.brain.voice";
@@ -11,7 +11,7 @@ const { core, useBrainStack, createEventHandlerMutatorShallow, getValue } =
 
 export default function AgentsPage() {
   const bstack = useBrainStack();
-  const {state, startListening} = useBrainVoice()
+  // const {state, startListening} = useBrainVoice()
 
   bstack.useOn('ibrain.voice.message', async (payload:any)=>{
     console.log(payload)

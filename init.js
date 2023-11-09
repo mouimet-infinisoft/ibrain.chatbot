@@ -1,24 +1,22 @@
-import { enDataSet } from './datasets/en.js'
 import chatinput from './corpus/ui/chat-input-en.json'
 import config from './corpus/ui/config-en.json'
-import navigationCorpus from '../../app/ai/navigation/corpus/en.json'
-import activeListen from './corpus/humanity/active-listening-em.json'
-import { core } from '@/app/hooks/brainstack.js';
+import navigationCorpus from './app/ai/navigation/corpus/en.json'
+import { core } from '@/app/layout';
 export let _nlplib;
 export let nlp;
+core
 
+// function loadNlpData(nlp, jsonData) {
+//     jsonData.documents.forEach((doc) => {
+//         nlp.addDocument(doc.lang, doc.utterance, doc.intent);
+//     });
 
-function loadNlpData(nlp, jsonData) {
-    jsonData.documents.forEach((doc) => {
-        nlp.addDocument(doc.lang, doc.utterance, doc.intent);
-    });
+//     jsonData.answers.forEach((ans) => {
+//         nlp.addAnswer(ans.lang, ans.intent, ans.answer);
+//     });
+// }
 
-    jsonData.answers.forEach((ans) => {
-        nlp.addAnswer(ans.lang, ans.intent, ans.answer);
-    });
-}
-
-const init = async () => {
+const init = async (core) => {
     if (typeof window !== "undefined") {
         _nlplib = window?.nlpjs;
         let container = await _nlplib?.containerBootstrap();

@@ -12,19 +12,19 @@ import {
 } from "langchain/agents/toolkits";
 import { ChatMessageHistory } from "langchain/memory";
 import { initializeAgentExecutorWithOptions } from "langchain/agents";
-import { sendEmailTool } from "@/app/tools/sendemail";
+import { sendEmailTool } from "../../../../../ai/tools/sendemail";
 import { WebBrowser } from "langchain/tools/webbrowser";
-import { umlTool } from "@/app/tools/uml";
-import { listFilesTool } from "@/app/tools/fs/list";
-import { readFileTool } from "@/app/tools/fs/read";
-import { createFileTool } from "@/app/tools/fs/create";
-import { updateFileTool } from "@/app/tools/fs/update";
-import { createFolderTool } from "@/app/tools/fs/mkdir";
+import { umlTool } from "../../../../../ai/tools/uml";
+import { listFilesTool } from "../../../../../ai/tools/fs/list";
+import { readFileTool } from "../../../../../ai/tools/fs/read";
+import { createFileTool } from "../../../../../ai/tools/fs/create";
+import { updateFileTool } from "../../../../../ai/tools/fs/update";
+import { createFolderTool } from "../../../../../ai/tools/fs/mkdir";
 // import { searchFileTool } from "@/app/tools/fs/search";
-import { deployStoredProcTool } from "@/app/tools/sql/deploy"; // Import the deployStoredProcTool
-import { runSqlQueryTool } from "@/app/tools/sql/run_sql_query";
-import { generateRouteTool } from "@/app/tools/dynamic_tool_generator/api/generator";
-import { generateToolDynamicTool } from "@/app/tools/dynamic_tool_generator/tool/generator";
+import { deployStoredProcTool } from "../../../../../ai/tools/sql/deploy"; // Import the deployStoredProcTool
+import { runSqlQueryTool } from "../../../../../ai/tools/sql/run_sql_query";
+import { generateRouteTool } from "../../../../../ai/tools/dynamic_tool_generator/api/generator";
+import { generateToolDynamicTool } from "../../../../../ai/tools/dynamic_tool_generator/tool/generator";
 // import { aiExpectationTool } from "@/app/tools/conversation/ai_expectation";
 // import { storeIdentificationTool } from "@/app/tools/conversation/store_identification";
 

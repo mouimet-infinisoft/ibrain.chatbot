@@ -9,12 +9,12 @@ import { SystemMessage, type AgentStep } from "langchain/schema";
 import { ChatMessageBubble } from "@/components/ChatMessageBubble";
 import { UploadDocumentsForm } from "@/components/UploadDocumentsForm";
 import { IntermediateStep } from "./IntermediateStep";
-import { stripMarkdown } from "../app/helpers/transform";
+import { stripMarkdown } from "../../ibrain.chat/src/helpers/transform";
 import { useBrainVoice } from "@/app/hooks/use.brain.voice";
 import brainstack from "@/app/hooks/brainstack";
 import { useIdentication } from "@/app/hooks/use.identification";
 import { Message } from "ai";
-import { generateUUID } from "@/app/helpers/id";
+import { generateUUID } from "../../ibrain.chat/src/helpers/id";
 const { useBrainStack, getValue } = brainstack;
 
 export function ChatWindow(props: {
@@ -36,7 +36,7 @@ export function ChatWindow(props: {
     showIntermediateStepsToggle,
     emoji,
   } = props;
-  const { speak, SpeakerToggle, MicToggle } = useBrainVoice();
+  // const { speak, SpeakerToggle, MicToggle } = useBrainVoice();
   const formRef = useRef<any>(null);
   const [showIntermediateSteps, setShowIntermediateSteps] = useState(false);
   const [intermediateStepsLoading, setIntermediateStepsLoading] =
@@ -92,7 +92,7 @@ export function ChatWindow(props: {
     onFinish(message) {
       bstack.log.info(message?.content);
       bstack.log.info(stripMarkdown(message?.content));
-      speak(stripMarkdown(message?.content));
+      // speak(stripMarkdown(message?.content));
     },
   });
 
@@ -277,8 +277,8 @@ export function ChatWindow(props: {
       >
         <div className="flex gap-1">
           {intemediateStepsToggle}
-          <SpeakerToggle />
-          <MicToggle />
+          {/* <SpeakerToggle />
+          <MicToggle /> */}
         </div>
         <div className="flex w-full mt-4 gap-1 flex-wrap">
           <input
